@@ -1,29 +1,11 @@
 import arcade
-import os
-import sys
-import time
-import math
+from car import *
 
 
-class Car():
-
-    def __init__(self, x, y, acceleration, deceleration, rotation):
-        self.x = x
-        self.y = y
-        self.acceleration = acceleration
-        self.deceleration = deceleration
-        self.rotation = rotation
-        self.velocity = 0
-
-    def get_velocity_y(self):
-        return self.velocity * math.sin(math.radians(self.rotation))
-
-    def get_velocity_x(self):
-        return self.velocity * math.cos(math.radians(self.rotation))
-
-
+# Class used as helper, may be integrated into main class later
 class Helper():
 
+    # Initialize class
     def __init__(self):
         self.W = False
         self.S = False
@@ -35,11 +17,11 @@ class Helper():
 class CarGame(arcade.Window):
 
     # Initialize window
-    def __init__(self, width, height, title):
+    def __init__(self, width, height, title, ):
 
-        super().__init__(width, height, title)
+        super().__init__(width, height, title, False, True)
         arcade.set_background_color(arcade.color.WHITE)
-        self.car = Car(300, 50, 0.1, 0.2, 90)
+        self.car = Car(300, 50, 0.5, 0.5, 90)
         self.helper = Helper()
 
     # Prepare Tile Array
@@ -51,28 +33,31 @@ class CarGame(arcade.Window):
     def on_draw(self):
 
         arcade.start_render()
-
+        
         arcade.draw_rectangle_filled(
-            self.car.x, self.car.y, 65, 45, arcade.color.RED, self.car.rotation)
+            self.car.x, self.car.y, 30, 15, arcade.color.RED, self.car.rotation)
+        
+        arcade.draw_text(str(self.car.velocity), 10, 10, arcade.color.BLACK, 24)
 
     # Handle user key press
     def on_key_press(self, key, modifiers):
 
-        # Car movement    
+        # Car movement keys
         if key == arcade.key.W:
             self.helper.W = True
+            if self.car.velocity < 0:
+                self.car.braking = True
         if key == arcade.key.S:
             self.helper.S = True
+            if self.car.velocity > 0:
+                self.car.braking = True
         if key == arcade.key.A:
             self.helper.A = True
         if key == arcade.key.D:
             self.helper.D = True
 
-        # Strafe left/right for now
-        #elif key == arcade.key.A:
-        #    self.car.x -= 10
-        #elif key == arcade.key.D:
-        #    self.car.x += 10
+        if key == arcade.key.SPACE:
+            self.car.velocity = 0
 
         # Exit game
         if key == arcade.key.Q:
@@ -81,11 +66,13 @@ class CarGame(arcade.Window):
     # Handle user key release
     def on_key_release(self, key, modifiers):
         
-        # Car movement
+        # Car movement keys
         if key == arcade.key.W:
             self.helper.W = False
+            self.car.braking = False
         if key == arcade.key.S:
             self.helper.S = False
+            self.car.braking = False
         if key == arcade.key.A:
             self.helper.A = False
         if key == arcade.key.D:
@@ -96,18 +83,19 @@ class CarGame(arcade.Window):
         
         # Handle car velocity change
         if self.helper.W and self.car.velocity >= 0:
-            self.car.velocity += self.car.acceleration
+            self.car.accelerate(True, True)
         if self.helper.W and self.car.velocity < 0:
-            self.car.velocity += self.car.deceleration
+            self.car.accelerate(False, False)
         if self.helper.S and self.car.velocity > 0:
-            self.car.velocity -= self.car.deceleration
+            self.car.accelerate(False, True)
         if self.helper.S and self.car.velocity <= 0:
-            self.car.velocity -= self.car.acceleration
+            self.car.accelerate(True, False)
+        
         # Handle car rotation
         if self.helper.A:
-            self.car.rotation += 5
+            self.car.rotate(False)
         if self.helper.D:
-            self.car.rotation -= 5
+            self.car.rotate(True)
 
         # Handle car position change
         self.car.y += self.car.get_velocity_y()
@@ -117,11 +105,11 @@ class CarGame(arcade.Window):
         if self.car.x > self.get_size()[0]:
             self.car.x = 0
         elif self.car.x < 0:
-            self.car.x = 600
+            self.car.x = self.get_size()[0]
         if self.car.y > self.get_size()[1]:
             self.car.y = 0
         elif self.car.y < 0:
-            self.car.y = 600
+            self.car.y = self.get_size()[1]
 
         self.on_draw()
 
@@ -130,7 +118,7 @@ class CarGame(arcade.Window):
 def main():
 
     # Global vars for easier edit
-    SCREEN_WIDTH = 600
+    SCREEN_WIDTH = 1000
     SCREEN_HEIGHT = 600
     SCREEN_TITLE = "Car Racer"
 

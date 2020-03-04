@@ -1,0 +1,55 @@
+import math
+
+
+# Class representing car 
+class Car():
+
+    # Initialize car values
+    def __init__(self, x, y, acceleration, deceleration, rotation):
+        
+        self.x = x
+        self.y = y
+        self.acceleration = acceleration
+        self.deceleration = deceleration
+        self.rotation = rotation
+        self.velocity = 0
+        self.__max_speed = 20
+        self.__rotation_coef = 10
+        self.braking = False
+        
+    # Get shift in Y axis
+    def get_velocity_y(self):
+        
+        return self.velocity * math.sin(math.radians(self.rotation))
+
+    # Get shift in X axis
+    def get_velocity_x(self):
+        
+        return self.velocity * math.cos(math.radians(self.rotation))
+
+    # Change car velocity
+    def accelerate(self, accelerate: bool, forward: bool):
+        
+        # Acceleration
+        if accelerate:
+            if abs(self.velocity) < self.__max_speed and forward and not self.braking:
+                self.velocity += self.acceleration
+            elif abs(self.velocity) < self.__max_speed and not self.braking:
+                self.velocity -= self.acceleration
+        
+        # Deceleration
+        else:
+            if forward:
+                self.velocity -= self.deceleration
+            else:
+                self.velocity += self.deceleration    
+
+    def rotate(self, right: bool):
+        
+        # Turning right
+        if right:
+            self.rotation -= self.__rotation_coef
+        
+        # Turning left
+        else:
+            self.rotation += self.__rotation_coef

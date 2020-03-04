@@ -1,1 +1,3 @@
 .vscode
+CarGame/__pycache__
+*.code-workspace
