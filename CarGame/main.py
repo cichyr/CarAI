@@ -33,11 +33,12 @@ class CarGame(arcade.Window):
     def on_draw(self):
 
         arcade.start_render()
-        
+
         arcade.draw_rectangle_filled(
             self.car.x, self.car.y, 30, 15, arcade.color.RED, self.car.rotation)
-        
-        arcade.draw_text(str(self.car.velocity), 10, 10, arcade.color.BLACK, 24)
+
+        arcade.draw_text(str(self.car.velocity), 10,
+                         10, arcade.color.BLACK, 24)
 
     # Handle user key press
     def on_key_press(self, key, modifiers):
@@ -65,7 +66,7 @@ class CarGame(arcade.Window):
 
     # Handle user key release
     def on_key_release(self, key, modifiers):
-        
+
         # Car movement keys
         if key == arcade.key.W:
             self.helper.W = False
@@ -80,21 +81,26 @@ class CarGame(arcade.Window):
 
     # Handle screen updates
     def on_update(self, x):
-        
+
         # Handle car velocity change
         if self.helper.W and self.car.velocity >= 0:
-            self.car.accelerate(True, True)
-        if self.helper.W and self.car.velocity < 0:
-            self.car.accelerate(False, False)
-        if self.helper.S and self.car.velocity > 0:
-            self.car.accelerate(False, True)
-        if self.helper.S and self.car.velocity <= 0:
-            self.car.accelerate(True, False)
-        
+            self.car.accelerate(True, False, True)
+        elif self.helper.W and self.car.velocity < 0:
+            self.car.accelerate(False, True, False)
+        elif self.helper.S and self.car.velocity > 0:
+            self.car.accelerate(False, True, True)
+        elif self.helper.S and self.car.velocity <= 0:
+            self.car.accelerate(True, False, False)
+
+        if not self.helper.W and self.car.velocity > 0:
+            self.car.accelerate(False, False, True)
+        elif not self.helper.S and self.car.velocity < 0:
+            self.car.accelerate(False, False, False)
+
         # Handle car rotation
-        if self.helper.A:
+        if self.helper.A and self.car.velocity > 0:
             self.car.rotate(False)
-        if self.helper.D:
+        if self.helper.D and self.car.velocity > 0:
             self.car.rotate(True)
 
         # Handle car position change
