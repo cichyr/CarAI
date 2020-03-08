@@ -14,8 +14,8 @@ class Car():
         self.deceleration = 0.25
         self.rotation = rotation
         self.velocity = 0
-        self.__max_speed = 20
-        self.__rotation_coef = 10
+        self.__max_speed = 5#20
+        self.__rotation_coef = 5#10
         self.braking = False
 
     # Get shift in Y axis
@@ -61,3 +61,15 @@ class Car():
         # Turning left
         else:
             self.rotation += self.__rotation_coef
+
+    def fR(self):
+        return (self.x + (15*math.cos(math.radians(self.rotation)) + 7*math.sin(math.radians(self.rotation))), self.y + (15*math.sin(math.radians(self.rotation)) - 7*math.cos(math.radians(self.rotation))))
+
+    def fL(self):
+        return (self.x + (15*math.cos(math.radians(self.rotation)) - 7*math.sin(math.radians(self.rotation))), self.y + (15*math.sin(math.radians(self.rotation)) + 7*math.cos(math.radians(self.rotation))))
+    
+    def rR(self):
+        return (self.x + (-15*math.cos(math.radians(self.rotation)) + 7*math.sin(math.radians(self.rotation))), self.y + (-15*math.sin(math.radians(self.rotation)) - 7*math.cos(math.radians(self.rotation))))
+
+    def rL(self):
+        return (self.x + (-15*math.cos(math.radians(self.rotation)) - 7*math.sin(math.radians(self.rotation))), self.y + (-15*math.sin(math.radians(self.rotation)) + 7*math.cos(math.radians(self.rotation))))

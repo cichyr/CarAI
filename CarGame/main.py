@@ -1,4 +1,5 @@
 import arcade
+import math
 from car import *
 
 
@@ -26,8 +27,7 @@ class CarGame(arcade.Window):
 
     # Prepare Tile Array
     def setup(self):
-
-        self.on_draw()
+        pass
 
     # Render the screen
     def on_draw(self):
@@ -35,7 +35,12 @@ class CarGame(arcade.Window):
         arcade.start_render()
 
         arcade.draw_rectangle_filled(
-            self.car.x, self.car.y, 30, 15, arcade.color.RED, self.car.rotation)
+            self.car.x, self.car.y, 30, 14, arcade.color.RED, self.car.rotation)
+        
+        arcade.draw_point(self.car.fL()[0], self.car.fL()[1], arcade.color.BLACK, 9)
+        arcade.draw_point(self.car.fR()[0], self.car.fR()[1], arcade.color.BLACK, 9)
+        arcade.draw_point(self.car.rL()[0], self.car.rL()[1], arcade.color.BLACK, 9)
+        arcade.draw_point(self.car.rR()[0], self.car.rR()[1], arcade.color.BLACK, 9)
 
         arcade.draw_text(str(self.car.velocity), 10,
                          10, arcade.color.BLACK, 24)
@@ -98,9 +103,9 @@ class CarGame(arcade.Window):
             self.car.accelerate(False, False, False)
 
         # Handle car rotation
-        if self.helper.A and self.car.velocity > 0:
+        if self.helper.A:# and self.car.velocity > 0:
             self.car.rotate(False)
-        if self.helper.D and self.car.velocity > 0:
+        if self.helper.D:# and self.car.velocity > 0:
             self.car.rotate(True)
 
         # Handle car position change
