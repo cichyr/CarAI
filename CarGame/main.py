@@ -1,40 +1,36 @@
 import arcade
-import math
-from car import *
-from track import *
-
-
-# Class used as helper, may be integrated into main class later
-class Helper():
-
-    # Initialize class
-    def __init__(self):
-        self.W = False
-        self.S = False
-        self.A = False
-        self.D = False
+from car import Car
+from track import Track
+from helper import Helper
+from physics import Physics
 
 
 # Main game class
 class CarGame(arcade.Window):
 
     # Initialize window, initialize variables
-    def __init__(self, width, height, title, ):
+    def __init__(self, width, height, title):
         super().__init__(width, height, title, False, True)
         arcade.set_background_color(arcade.color.WHITE)
         self.car = Car(714, 266, 0.5, 0.5, 180)
         self.track = Track()
         self.helper = Helper()
+        self.physics = Physics()
         self.color = arcade.color.GREEN
 
     # Render the screen
     def on_draw(self):
         arcade.start_render()
 
-        # Draw Track
-        for section in zip(self.track.track, self.track.track[1:]):
+        # Draw track outer boundary
+        for section in zip(self.track.trackOuterBoundary, self.track.trackOuterBoundary[1:]):
             arcade.draw_line(
-                section[0][0], section[0][1], section[1][0], section[1][1], arcade.color.BLACK, 1)
+                section[0][0], section[0][1], section[1][0], section[1][1], arcade.color.BLACK)
+
+        # Draw track inner boundary
+        for section in zip(self.track.trackInnerBoundary, self.track.trackInnerBoundary[1:]):
+            arcade.draw_line(
+                section[0][0], section[0][1], section[1][0], section[1][1], arcade.color.BLACK)
 
         # Draw car
         arcade.draw_rectangle_filled(
@@ -52,7 +48,7 @@ class CarGame(arcade.Window):
 
     # Handle user key press
     def on_key_press(self, key, modifiers):
-        
+
         # Car movement keys
         if key == arcade.key.W:
             self.helper.W = True
@@ -93,7 +89,8 @@ class CarGame(arcade.Window):
     def on_update(self, x):
 
         # Check for collisions
-        if self.track.getCollisions(self.car.fR(), self.car.fL(), self.car.rR(), self.car.rL()):
+        carList = [self.car.fR(), self.car.fL(), self.car.rL(), self.car.rR(), self.car.fR()]
+        if self.physics.getCollisions(carList, self.track.trackOuterBoundary) or self.physics.getCollisions(carList, self.track.trackInnerBoundary):
             self.color = arcade.color.RED
         else:
             self.color = arcade.color.GREEN
