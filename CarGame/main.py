@@ -43,8 +43,17 @@ class CarGame(arcade.Window):
         #arcade.draw_point(self.car.rR()[0], self.car.rR()[1], arcade.color.BLACK, 9)
 
         # Debug text writing
-        #arcade.draw_text(str(arcade.check_for_collision(self.car_sprite, self.track_sprite)), 10,
-        #                 10, arcade.color.BLACK, 24)
+        arcade.draw_text('Outer: '+str(self.track.trackOuterBoundary), 10,
+                         10, arcade.color.BLACK, 12)
+        arcade.draw_text('Inner: '+str(self.track.trackInnerBoundary), 10,
+                         30, arcade.color.BLACK, 12)
+
+    # Handle mouse movement -> for track creation
+    def on_mouse_press(self, x, y, button, modifiers):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.track.trackOuterBoundary.append((x,y))
+        elif button == arcade.MOUSE_BUTTON_RIGHT:
+            self.track.trackInnerBoundary.append((x,y))
 
     # Handle user key press
     def on_key_press(self, key, modifiers):
@@ -138,7 +147,7 @@ def main():
     SCREEN_HEIGHT = 1080
     SCREEN_TITLE = "Car Racer"
 
-    game = CarGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    CarGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     arcade.run()
 
 
