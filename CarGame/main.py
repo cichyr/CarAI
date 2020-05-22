@@ -93,6 +93,10 @@ class CarGame(arcade.Window):
             self.helper.A = False
         if key == arcade.key.D:
             self.helper.D = False
+        if key == arcade.key.I:
+            self.track.trackInnerBoundary = []
+        if key == arcade.key.O:
+            self.track.trackOuterBoundary = []
 
     # Handle screen updates
     def on_update(self, x):
