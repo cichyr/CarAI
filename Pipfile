@@ -9,6 +9,7 @@ autopep8 = "*"
 
 [packages]
 arcade = "*"
+keyboard = "*"
 
 [requires]
 python_version = "3.8"

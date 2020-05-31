@@ -6,16 +6,25 @@ class Car():
 
     # Initialize car values
     def __init__(self, x, y, acceleration, brake_force, rotation):
+        self.__x = x
         self.x = x
+        self.__y = y
         self.y = y
         self.acceleration = acceleration
         self.brake_force = brake_force
         self.deceleration = 0.25
+        self.__rotation = rotation
         self.rotation = rotation
         self.velocity = 0
         self.__max_speed = 15
         self.__rotation_coef = 7
         self.braking = False
+
+    def reset(self):
+        self.x = self.__x
+        self.y = self.__y
+        self.rotation = self.__rotation
+        self.velocity = 0
 
     # Get shift in Y axis
     def get_velocity_y(self):

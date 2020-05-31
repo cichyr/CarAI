@@ -6,7 +6,7 @@ class Physics():
         return p1[0]*p2[1] + p2[0]*p3[1] + p3[0]*p1[1] - p3[0]*p2[1] - p1[0]*p3[1] - p2[0]*p1[1]
 
     # Checking if point is on track line
-    def pointOnSection(self, point1, point2, point3):
+    def point_on_section(self, point1, point2, point3):
 
         # Point is on same line as section if determinant is equal 0
         if self.determinant(point1, point2, point3) == 0:
@@ -21,26 +21,54 @@ class Physics():
         return False
 
     # Check for collisions of car with track borders
-    def getCollisions(self, points, sections):
+    def get_collisions(self, points, sections):
 
         # For each car side chech collision with each track boundary section
         for side in zip(points, points[1:]):
             for section in zip(sections, sections[1:]):
 
                 # Checking if car/track points are on track boundary/car side respectively (point on section)
-                if self.pointOnSection(section[0], section[1], side[0]):
+                if self.point_on_section(section[0], section[1], side[0]):
                     return True
-                if self.pointOnSection(section[0], section[1], side[1]):
+                if self.point_on_section(section[0], section[1], side[1]):
                     return True
-                if self.pointOnSection(side[0], side[1], section[0]):
+                if self.point_on_section(side[0], side[1], section[0]):
                     return True
-                if self.pointOnSection(side[0], side[1], section[1]):
+                if self.point_on_section(side[0], side[1], section[1]):
                     return True
 
                 # Checking if sections are not crossing
                 if (self.determinant(section[0], section[1], side[0]) * self.determinant(section[0], section[1], side[1])) >= 0:
                     pass
                 elif (self.determinant(side[0], side[1], section[0]) * self.determinant(side[0], side[1], section[1])) >= 0:
+                    pass
+                else:  # Else sections are crossing
+                    return True
+
+        # No collisions detected
+        return False
+
+    # Check for collisions of car with cookie
+    def get_cookie_collisions(self, points, sections):
+
+        # For each car side chech collision with each cookie
+        for side in zip(points, points[1:]):
+            for p1, p2 in zip(*[iter(sections)]*2):
+
+                # Checking if car/cookie points are on cookie/car side respectively (point on section)
+                if self.point_on_section(p1, p2, side[0]):
+                    return True
+                if self.point_on_section(p1, p2, side[1]):
+                    return True
+                if self.point_on_section(side[0], side[1], p1):
+                    return True
+                if self.point_on_section(side[0], side[1], p2):
+                    return True
+
+                # Checking if sections are not crossing
+                if (self.determinant(p1, p2, side[0]) * self.determinant(p1, p2, side[1])) >= 0:
+                    pass
+                elif (self.determinant(side[0], side[1], p1) * self.determinant(side[0], side[1], p2)) >= 0:
                     pass
                 else:  # Else sections are crossing
                     return True
