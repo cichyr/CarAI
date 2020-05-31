@@ -10,6 +10,8 @@ autopep8 = "*"
 [packages]
 arcade = "*"
 keyboard = "*"
+pillow = "*"
+shapely = "*"
 
 [requires]
 python_version = "3.8"

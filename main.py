@@ -15,6 +15,8 @@ def run_game():
     SCREEN_TITLE = "Car Racer"
     global game
     game = CarGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    game.set_update_rate(1/60)
+    game.set_vsync(True)
     arcade.run()
 
 
@@ -39,21 +41,24 @@ def action():
 
 
 def main():
-    thread = threading.Thread(target=run_game)
-    thread.start()
-    time.sleep(1)
+    #thread = threading.Thread(target=run_game)
+    #thread.start()
+    #time.sleep(1)
+    
+    run_game()
 
     done = False
     epochs = 0
 
-    while (not done) or (not keyboard.is_pressed('q')):
+    while not True:#keyboard.is_pressed('q'):
         action()
         reward, done = game.get_state()
 
         epochs += 1
         time.sleep(0.01)
 
-    print("Epochs: {}".format(epochs))
+        if epochs%100 == 0:
+            print("Epochs: {}".format(epochs))
         
         
 if __name__ == '__main__':

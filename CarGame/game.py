@@ -2,7 +2,7 @@ import arcade
 from CarGame.car import Car
 from CarGame.track import Track
 from CarGame.helper import Helper
-from CarGame.physics import Physics
+from shapely.geometry import LineString
 
 
 # Main game class
@@ -12,53 +12,80 @@ class CarGame(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title, False, True)
         arcade.set_background_color(arcade.color.WHITE)
-        self.car = Car(0, 457, 0.5, 0.5, 0)
         self.track = Track()
+        self.car = Car(109, 528, 0.5, 0.5, 90, self.track)
         self.helper = Helper()
-        self.physics = Physics()
         self.color = arcade.color.GREEN
         self.points = 0
+
+        #arcade.start_render()
+        # Draw track outer boundary
+        #for section in zip(self.track.trackOuterBoundary, self.track.trackOuterBoundary[1:]):
+        #    arcade.draw_line(
+        #        section[0][0], section[0][1], section[1][0], section[1][1], arcade.color.BLACK)
+
+        # Draw track inner boundary
+        #for section in zip(self.track.trackInnerBoundary, self.track.trackInnerBoundary[1:]):
+        #    arcade.draw_line(
+        #        section[0][0], section[0][1], section[1][0], section[1][1], arcade.color.BLACK)
 
     # Render the screen
     def on_draw(self):
         arcade.start_render()
 
         # Draw track outer boundary
-        for section in zip(self.track.trackOuterBoundary, self.track.trackOuterBoundary[1:]):
-            arcade.draw_line(
-                section[0][0], section[0][1], section[1][0], section[1][1], arcade.color.BLACK)
+        arcade.draw_line_strip(
+            self.track.trackOuterBoundary, arcade.color.BLACK)
 
         # Draw track inner boundary
-        for section in zip(self.track.trackInnerBoundary, self.track.trackInnerBoundary[1:]):
-            arcade.draw_line(
-                section[0][0], section[0][1], section[1][0], section[1][1], arcade.color.BLACK)
-
-        # Draw cookies
-        for p1, p2 in zip(*[iter(self.track.trackCookies)]*2):
-            arcade.draw_line(p1[0], p1[1], p2[0], p2[1], arcade.color.BLACK)
+        arcade.draw_line_strip(
+            self.track.trackInnerBoundary, arcade.color.BLACK)
 
         # Draw car
         arcade.draw_rectangle_filled(
             self.car.x, self.car.y, 30, 14, self.color, self.car.rotation)
 
-        # Debug car corners drawing
+        ##### DEBUG DRAWING #####
+
+        # Draw rays
+        #arcade.draw_lines(self.car.get_rays(), arcade.color.GREEN)
+
+        # Draw intersections
+        #for intersection in self.car.get_ray_intersection_points():
+        #    if intersection:
+        #        arcade.draw_point(intersection[1][0], intersection[1][1], arcade.color.RED, 9)
+
+        # Draw cookies
+        arcade.draw_lines(self.track.trackCookies, arcade.color.BLACK)
+
+        # Draw car corners
         #arcade.draw_point(self.car.fL()[0], self.car.fL()[1], arcade.color.BLACK, 9)
         #arcade.draw_point(self.car.fR()[0], self.car.fR()[1], arcade.color.BLACK, 9)
         #arcade.draw_point(self.car.rL()[0], self.car.rL()[1], arcade.color.BLACK, 9)
         #arcade.draw_point(self.car.rR()[0], self.car.rR()[1], arcade.color.BLACK, 9)
 
-        # Debug text writing
-        arcade.draw_text('Outer: '+str(self.track.trackOuterBoundary), 10,
-                         10, arcade.color.BLACK, 12)
-        arcade.draw_text('Inner: '+str(self.track.trackInnerBoundary), 10,
-                         30, arcade.color.BLACK, 12)
+        # Write text
+        #distances = self.car.get_intersection_distances()
+        #for i in range(0, 10):
+        #    arcade.draw_text('{}: {}'.format(i, distances[i]), 10, i*15, arcade.color.BLACK, 12)
+        #arcade.draw_text('Outer: '+str(self.track.trackOuterBoundary), 10,
+        #                 10, arcade.color.BLACK, 12)
+        #arcade.draw_text('Inner: '+str(self.track.trackInnerBoundary), 10,
+        #                 30, arcade.color.BLACK, 12)
+        #arcade.draw_text('Cookies: '+str(self.track.trackCookies), 10,
+        #                 10, arcade.color.BLACK, 12)
 
     # Handle mouse movement -> for track creation
     def on_mouse_press(self, x, y, button, modifiers):
-        if button == arcade.MOUSE_BUTTON_LEFT:
-            self.track.trackOuterBoundary.append((x,y))
-        elif button == arcade.MOUSE_BUTTON_RIGHT:
-            self.track.trackInnerBoundary.append((x,y))
+        ##### DEBUG #####
+
+        #if button == arcade.MOUSE_BUTTON_LEFT:
+        #    self.track.trackOuterBoundary.append((x, y))
+        #elif button == arcade.MOUSE_BUTTON_RIGHT:
+        #    self.track.trackInnerBoundary.append((x, y))
+        #if button == arcade.MOUSE_BUTTON_LEFT:
+        #    self.track.trackCookies.append((x, y))
+        pass
 
     # Handle user key press
     def on_key_press(self, key, modifiers):
@@ -98,25 +125,52 @@ class CarGame(arcade.Window):
             self.helper.A = False
         if key == arcade.key.D:
             self.helper.D = False
-        if key == arcade.key.I:
-            self.track.trackInnerBoundary = []
-        if key == arcade.key.O:
-            self.track.trackOuterBoundary = []
+
+        # Debug, for drawing track
+        #if key == arcade.key.I:
+        #    self.track.trackInnerBoundary = []
+        #if key == arcade.key.O:
+        #    self.track.trackOuterBoundary = []
+        #if key == arcade.key.I:
+        #    self.track.trackCookies = []
+        #if key == arcade.key.O:
+        #    self.track.trackCookies.pop()
+        #    self.track.trackCookies.pop()
 
     # Handle screen updates
     def on_update(self, x):
 
         # Check for collisions
-        carList = [self.car.fR(), self.car.fL(), self.car.rL(), self.car.rR(), self.car.fR()]
-        if self.physics.get_collisions(carList, self.track.trackOuterBoundary) or self.physics.get_collisions(carList, self.track.trackInnerBoundary):
-            self.car.reset()
-            self.points -= 1
+        fr = self.car.fR()
+        fl = self.car.fL()
+        rr = self.car.rR()
+        rl = self.car.rL()
+        carLines = [LineString([fr, fl]), LineString(
+            [rr, rl]), LineString([fr, rr]), LineString([fl, rl])]
 
-        if self.physics.get_cookie_collisions(carList, self.track.trackCookies) and not self.helper.cookie:
-            self.helper.cookie = True
-            self.points += 10
-        else:
-            self.helper.cookie = False
+        # Track outer boundary collision
+        for section in zip(self.track.trackOuterBoundary, self.track.trackOuterBoundary[1:]):
+            line = LineString([section[0], section[1]])
+            for side in carLines:
+                if side.intersects(line):
+                    self.car.reset()
+
+        # Track inner boundary collision
+        for section in zip(self.track.trackInnerBoundary, self.track.trackInnerBoundary[1:]):
+            line = LineString([section[0], section[1]])
+            for side in carLines:
+                if side.intersects(line):
+                    self.car.reset()
+
+        # Cookie collsion
+        for p1, p2 in zip(*[iter(self.track.trackCookies)]*2):
+            line = LineString([p1, p2])
+            for side in carLines:
+                if side.intersects(line) and not self.helper.cookie:
+                    self.helper.cookie = True
+                    self.points += 10
+                else:
+                    self.helper.cookie = False
 
         # Handle car velocity change
         if self.helper.W and self.car.velocity >= 0:
@@ -136,22 +190,28 @@ class CarGame(arcade.Window):
         # Handle car rotation
         if self.helper.A and self.car.velocity > 0:
             self.car.rotate(False)
+        if self.helper.A and self.car.velocity < 0:
+            self.car.rotate(True)
         if self.helper.D and self.car.velocity > 0:
             self.car.rotate(True)
+        if self.helper.D and self.car.velocity < 0:
+            self.car.rotate(False)
 
         # Handle car position change
-        self.car.y += self.car.get_velocity_y()
-        self.car.x = self.car.x + self.car.get_velocity_x()
+        self.car.y += self.car.get_shift_y(self.car.velocity)
+        self.car.x += self.car.get_shift_x(self.car.velocity)
+
+        ##### DEBUG #####
 
         # Loop car on border, just for lols and not losing the car
-        if self.car.x > self.get_size()[0]:
-            self.car.x = 0
-        elif self.car.x < 0:
-            self.car.x = self.get_size()[0]
-        if self.car.y > self.get_size()[1]:
-            self.car.y = 0
-        elif self.car.y < 0:
-            self.car.y = self.get_size()[1]
+        #if self.car.x > self.get_size()[0]:
+        #    self.car.x = 0
+        #elif self.car.x < 0:
+        #    self.car.x = self.get_size()[0]
+        #if self.car.y > self.get_size()[1]:
+        #    self.car.y = 0
+        #elif self.car.y < 0:
+        #    self.car.y = self.get_size()[1]
 
     def exit(self):
         arcade.window_commands.close_window()
@@ -181,7 +241,4 @@ class CarGame(arcade.Window):
         self.helper.D = False
 
     def get_state(self):
-        carList = [self.car.fR(), self.car.fL(), self.car.rL(), self.car.rR(), self.car.fR()]
-        if self.physics.get_cookie_collisions(carList, self.track.track_finish):
-            return self.points, True
-        return self.points, False
+        return self.car.x, self.car.y, self.car.velocity, self.car.rotation, self.car.get_intersection_distances(), self.points, False
