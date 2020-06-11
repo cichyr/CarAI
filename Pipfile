@@ -12,6 +12,8 @@ arcade = "*"
 keyboard = "*"
 pillow = "*"
 shapely = "*"
+tensorflow = "*"
+keras = "*"
 
 [requires]
 python_version = "3.8"

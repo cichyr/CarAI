@@ -18,7 +18,7 @@ class Car():
         self.__rotation = rotation
         self.rotation = rotation
         self.velocity = 0
-        self.__max_speed = 15
+        self.__max_speed = 10
         self.__rotation_coef = 7
         self.braking = False
         self.track = track
@@ -32,7 +32,7 @@ class Car():
 
     # Get car seeing rays - 100 pixels each direction
     def get_rays(self):
-        ray = 1000
+        ray = 400
         rays = []
         fr = self.fR()
         fl = self.fL()
@@ -123,7 +123,7 @@ class Car():
                     if (prev_point and self.calculate_length(rays[i*2], point) < self.calculate_length(rays[i*2], prev_point)) or not prev_point:
                         prev_point = point
                         intersection_points[i] = (rays[i*2], point)
-        
+
         return intersection_points
 
     # Get distances to intersections
@@ -134,10 +134,11 @@ class Car():
         # Get distance to intersection (segment length formula)
         for intersection in intersections:
             if intersection:
-                distances.append(math.ceil(self.calculate_length(intersection[0], intersection[1])))
+                distances.append(math.ceil(self.calculate_length(
+                    intersection[0], intersection[1])))
             else:
-                # They are far apart
-                distances.append(1000)
+                # They are too far apart
+                distances.append(400)
 
         return distances
 
