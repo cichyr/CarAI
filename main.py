@@ -21,12 +21,12 @@ LEARNING_RATE = 0.001
 MEMORY_SIZE = 1000000
 BATCH_SIZE = 32
 
-OBSERVATION = 100
+OBSERVATION = 0#100
 LEARNING = 8000
 
-EXPLORATION_MAX = 1
-EXPLORATION_MIN = 0.0001
-#EXPLORATION_DECAY = (EXPLORATION_MAX - EXPLORATION_MIN)/LEARNING
+EXPLORATION_MAX = 0.5#1
+EXPLORATION_MIN = 0.00001
+EXPLORATION_DECAY = (EXPLORATION_MAX - EXPLORATION_MIN)/LEARNING
 
 
 class DeepQNetwork:
@@ -38,11 +38,12 @@ class DeepQNetwork:
         self.memory = deque(maxlen=MEMORY_SIZE)
 
         self.model = Sequential()
-        self.model.add(Dense(40, input_shape=(observation_space,), activation="relu"))
-        self.model.add(Dense(80, activation="relu"))
-        self.model.add(Dense(80, activation="relu"))
-        self.model.add(Dense(40, activation="relu"))
-        self.model.add(Dense(20, activation="relu"))
+        self.model.add(Dense(24, input_shape=(observation_space,), activation="relu"))
+        self.model.add(Dense(48, activation="relu"))
+        self.model.add(Dense(96, activation="relu"))
+        self.model.add(Dense(96, activation="relu"))
+        self.model.add(Dense(48, activation="relu"))
+        self.model.add(Dense(24, activation="relu"))
         self.model.add(Dense(self.action_space, activation="linear"))
         self.model.compile(loss="mse", optimizer=Adam(lr=LEARNING_RATE))
 
@@ -56,8 +57,18 @@ class DeepQNetwork:
         return np.argmax(q_values[0])
 
     def experience_replay(self):
-        pass
-
+        if len(self.memory) < BATCH_SIZE:
+            return
+        batch = random.sample(self.memory, BATCH_SIZE)
+        for state, action, reward, state_next, terminal in batch:
+            q_update = reward
+            if not terminal:
+                q_update = (reward + GAMMA * np.amax(self.model.predict(state_next)[0]))
+            q_values = self.model.predict(state)
+            q_values[0][action] = q_update
+            self.model.fit(state, q_values, verbose=0)
+        self.exploration_rate -= EXPLORATION_DECAY
+        self.exploration_rate = max(EXPLORATION_MIN, self.exploration_rate)
 
 
 def run_game():
@@ -91,7 +102,7 @@ def main():
     
     #print(state)
 
-    observation_space = 10
+    observation_space = 13
     action_space = 4
 
     dqn = DeepQNetwork(observation_space, action_space)
@@ -102,11 +113,10 @@ def main():
     while True:
         run += 1
         state, reward, t_ctr = game.get_state()
+        reward_old = reward
         state = np.reshape(state, [1, observation_space])
-        step = 0
+        terminal = False
         while True:
-            terminal = False
-            step += 1
             action = dqn.act(state, True)
             do_action(action)
             state_next, reward, t_ctr = game.get_state()
@@ -118,9 +128,9 @@ def main():
             dqn.remember(state, action, reward, state_next, terminal)
             state = state_next
             if terminal:
-                print("Run: " + str(run) + ", exploration: " + str(dqn.exploration_rate) + ", score: " + str(step))
-                #score_logger.add_score(step, run)
+                print("Run: " + str(run) + ", exploration: " + str(dqn.exploration_rate) + ", score: " + str(reward_old))
                 break
+            reward_old = reward
             if ctr > OBSERVATION:
                 dqn.experience_replay()
 

@@ -20,7 +20,6 @@ class CarGame(arcade.Window):
         self.terminal = False
         self.terminal_counter = 0
 
-
     # Render the screen
     def on_draw(self):
         arcade.start_render()

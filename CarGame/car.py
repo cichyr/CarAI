@@ -140,6 +140,9 @@ class Car():
                 # They are too far apart
                 distances.append(400)
 
+        distances.append(self.x)
+        distances.append(self.y)
+        distances.append(self.velocity)
         return distances
 
     # Get shift in Y axis
