@@ -38,22 +38,20 @@ class DeepQNetwork:
         self.memory = deque(maxlen=MEMORY_SIZE)
 
         self.model = Sequential()
-        self.model.add(Dense(24, input_shape=(observation_space,), activation="relu"))
-        self.model.add(Dense(48, activation="relu"))
-        self.model.add(Dense(96, activation="relu"))
-        self.model.add(Dense(96, activation="relu"))
-        self.model.add(Dense(48, activation="relu"))
-        self.model.add(Dense(24, activation="relu"))
+        self.model.add(Dense(400, input_shape=(observation_space,), activation="relu"))
+        self.model.add(Dense(300, activation="relu"))
+        self.model.add(Dense(200, activation="relu"))
         self.model.add(Dense(self.action_space, activation="linear"))
         self.model.compile(loss="mse", optimizer=Adam(lr=LEARNING_RATE))
 
     def remember(self, state, action, reward, next_state, terminal):
         self.memory.append((state, action, reward, next_state, terminal))
 
-    def act(self, state, observation):
-        if (np.random.rand() < self.exploration_rate) or observation:
+    def act(self, state):
+        if np.random.rand() < self.exploration_rate:
             return random.randrange(self.action_space)
         q_values = self.model.predict(state)
+        #print(np.argmax(q_values[0]))
         return np.argmax(q_values[0])
 
     def experience_replay(self):
@@ -117,7 +115,7 @@ def main():
         state = np.reshape(state, [1, observation_space])
         terminal = False
         while True:
-            action = dqn.act(state, True)
+            action = dqn.act(state)
             do_action(action)
             state_next, reward, t_ctr = game.get_state()
             if t_ctr != ctr:
@@ -131,7 +129,7 @@ def main():
                 print("Run: " + str(run) + ", exploration: " + str(dqn.exploration_rate) + ", score: " + str(reward_old))
                 break
             reward_old = reward
-            if ctr > OBSERVATION:
+            if run > OBSERVATION:
                 dqn.experience_replay()
 
 
