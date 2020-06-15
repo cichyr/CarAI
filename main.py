@@ -15,17 +15,17 @@ from keras.optimizers import Adam
 game = ""
 
 
-GAMMA = 0.95
+GAMMA = 0.9
 LEARNING_RATE = 0.001
 
 MEMORY_SIZE = 1000000
 BATCH_SIZE = 32
 
 OBSERVATION = 0#100
-LEARNING = 8000
+LEARNING = 100000
 
 EXPLORATION_MAX = 0.5#1
-EXPLORATION_MIN = 0.00001
+EXPLORATION_MIN = 0.0001#0.229
 EXPLORATION_DECAY = (EXPLORATION_MAX - EXPLORATION_MIN)/LEARNING
 
 
@@ -38,9 +38,12 @@ class DeepQNetwork:
         self.memory = deque(maxlen=MEMORY_SIZE)
 
         self.model = Sequential()
-        self.model.add(Dense(400, input_shape=(observation_space,), activation="relu"))
-        self.model.add(Dense(300, activation="relu"))
-        self.model.add(Dense(200, activation="relu"))
+        self.model.add(Dense(32, input_shape=(observation_space,), activation="relu"))
+        self.model.add(Dense(128, activation="relu"))
+        self.model.add(Dense(128, activation="relu"))
+        self.model.add(Dense(128, activation="relu"))
+        self.model.add(Dense(64, activation="relu"))
+        self.model.add(Dense(32, activation="relu"))
         self.model.add(Dense(self.action_space, activation="linear"))
         self.model.compile(loss="mse", optimizer=Adam(lr=LEARNING_RATE))
 
@@ -80,18 +83,6 @@ def run_game():
     arcade.run()
 
 
-def do_action(choice):
-    game.release()
-    if choice == 0:
-        game.press_W()
-    elif choice == 1:
-        game.press_S()
-    elif choice == 2:
-        game.press_A()
-    elif choice == 3:
-        game.press_D()
-
-
 def main():
     #run_game()
     thread = threading.Thread(target=run_game)
@@ -100,28 +91,21 @@ def main():
     
     #print(state)
 
-    observation_space = 13
+    observation_space = 15
     action_space = 4
 
     dqn = DeepQNetwork(observation_space, action_space)
     run = 0
-    ctr = 0
-    terminal = False
 
     while True:
         run += 1
-        state, reward, t_ctr = game.get_state()
-        reward_old = reward
+        state = game.reset()
         state = np.reshape(state, [1, observation_space])
-        terminal = False
+        reward_old = 0
         while True:
             action = dqn.act(state)
-            do_action(action)
-            state_next, reward, t_ctr = game.get_state()
-            if t_ctr != ctr:
-                terminal = True
-                ctr = t_ctr
-            reward = reward if not terminal else -reward
+            state_next, reward, terminal = game.get_state(action)
+            reward = reward if not terminal else -reward_old
             state_next = np.reshape(state_next, [1, observation_space])
             dqn.remember(state, action, reward, state_next, terminal)
             state = state_next

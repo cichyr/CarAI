@@ -103,23 +103,22 @@ class Car():
             # Initial value
             intersection_points.append(False)
             prev_point = False
+            l1 = LineString([rays[i*2], rays[i*2 + 1]])
 
             # Get intersection with track outer boundary
             for section in zip(self.track.trackOuterBoundary, self.track.trackOuterBoundary[1:]):
-                l1 = LineString([rays[i*2], rays[i*2 + 1]])
                 l2 = LineString([section[0], section[1]])
                 if l1.intersects(l2):
-                    point = (l1.intersection(l2).x, l1.intersection(l2).y)
+                    point = (l1.intersection(l2).xy[0][0], l1.intersection(l2).xy[1][0])
                     if (prev_point and self.calculate_length(rays[i*2], point) < self.calculate_length(rays[i*2], prev_point)) or not prev_point:
                         prev_point = point
                         intersection_points[i] = (rays[i*2], point)
 
             # Get intersection with track inner boundary
             for section in zip(self.track.trackInnerBoundary, self.track.trackInnerBoundary[1:]):
-                l1 = LineString([rays[i*2], rays[i*2 + 1]])
                 l2 = LineString([section[0], section[1]])
                 if l1.intersects(l2):
-                    point = (l1.intersection(l2).x, l1.intersection(l2).y)
+                    point = (l1.intersection(l2).xy[0][0], l1.intersection(l2).xy[1][0])
                     if (prev_point and self.calculate_length(rays[i*2], point) < self.calculate_length(rays[i*2], prev_point)) or not prev_point:
                         prev_point = point
                         intersection_points[i] = (rays[i*2], point)
@@ -127,7 +126,7 @@ class Car():
         return intersection_points
 
     # Get distances to intersections
-    def get_intersection_distances(self):
+    def get_intersection_distances(self, cookie):
         intersections = self.get_ray_intersection_points()
         distances = []
 
@@ -143,6 +142,12 @@ class Car():
         distances.append(self.x)
         distances.append(self.y)
         distances.append(self.velocity)
+        p1 = self.track.trackCookies[cookie * 2]
+        p2 = self.track.trackCookies[(cookie * 2) + 1]
+        l = self.calculate_length(p1, p2)
+        distances.append(l)
+        angle = (math.asin((p2[1] - p1[1]) / l) * (180 / math.pi)) - self.rotation
+        distances.append(angle)
         return distances
 
     # Get shift in Y axis

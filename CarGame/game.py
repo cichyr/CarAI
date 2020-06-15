@@ -18,7 +18,7 @@ class CarGame(arcade.Window):
         self.color = arcade.color.GREEN
         self.points = 0
         self.terminal = False
-        self.terminal_counter = 0
+        self.cookie_counter = 0
 
     # Render the screen
     def on_draw(self):
@@ -65,8 +65,8 @@ class CarGame(arcade.Window):
         #                 30, arcade.color.BLACK, 12)
         #arcade.draw_text('Cookies: '+str(self.track.trackCookies), 10,
         #                 10, arcade.color.BLACK, 12)
-        arcade.draw_text('Terminal: '+str(self.terminal_counter), 10,
-                         10, arcade.color.BLACK, 12)
+        #arcade.draw_text('Terminal: '+str(self.terminal_counter), 10,
+        #                 10, arcade.color.BLACK, 12)
         arcade.draw_text('Points: '+str(self.points), 10,
                          30, arcade.color.BLACK, 12)
 
@@ -135,9 +135,9 @@ class CarGame(arcade.Window):
     # Handle screen updates
     def on_update(self, x):
 
-        if self.terminal:
-            self.terminal_counter += 1
-        self.terminal = False
+        self.color = arcade.color.GREEN
+
+        #self.terminal = False
         # Check for collisions
         fr = self.car.fR()
         fl = self.car.fL()
@@ -151,8 +151,6 @@ class CarGame(arcade.Window):
             line = LineString([section[0], section[1]])
             for side in carLines:
                 if side.intersects(line):
-                    self.car.reset()
-                    self.points = 0
                     self.terminal = True
 
         # Track inner boundary collision
@@ -160,65 +158,85 @@ class CarGame(arcade.Window):
             line = LineString([section[0], section[1]])
             for side in carLines:
                 if side.intersects(line):
-                    self.car.reset()
-                    self.points = 0
                     self.terminal = True
 
-        cookie = False
+        if not self.terminal:
+            cookie = False
 
-        # Cookie collsion
-        for p1, p2 in zip(*[iter(self.track.trackCookies)]*2):
-            line = LineString([p1, p2])
-            for side in carLines:
-                if side.intersects(line):
-                    cookie = True
+            awaited_cookie = int((self.cookie_counter % 49) + 1)
 
-        if cookie and not self.helper.cookie:
-            self.points += 10
-            self.helper.cookie = True
-        elif not cookie:
-            self.helper.cookie = False
+            # Cookie collsion
+            if not self.helper.cookie:
+                line = LineString([self.track.trackCookies[awaited_cookie * 2], self.track.trackCookies[(awaited_cookie * 2) + 1]])
+                for side in carLines:
+                    if side.intersects(line):
+                        cookie = True
 
-        # Handle car velocity change
-        if self.helper.W and self.car.velocity >= 0:
-            self.car.accelerate(True, False, True)
-        elif self.helper.W and self.car.velocity < 0:
-            self.car.accelerate(False, True, False)
-        elif self.helper.S and self.car.velocity > 0:
-            self.car.accelerate(False, True, True)
-        elif self.helper.S and self.car.velocity <= 0:
-            self.car.accelerate(True, False, False)
+            if cookie and not self.helper.cookie:
+                self.points += 100
+                self.cookie_counter += 1
+                self.helper.cookie = True
+            elif not cookie:
+                self.helper.cookie = False
 
-        if not self.helper.W and self.car.velocity > 0:
-            self.car.accelerate(False, False, True)
-        elif not self.helper.S and self.car.velocity < 0:
-            self.car.accelerate(False, False, False)
+            # Handle car velocity change
+            if self.helper.W and self.car.velocity >= 0:
+                self.car.accelerate(True, False, True)
+            elif self.helper.W and self.car.velocity < 0:
+                self.car.accelerate(False, True, False)
+            elif self.helper.S and self.car.velocity > 0:
+                self.car.accelerate(False, True, True)
+            elif self.helper.S and self.car.velocity <= 0:
+                self.car.accelerate(True, False, False)
 
-        # Handle car rotation
-        if self.helper.A and self.car.velocity > 0:
-            self.car.rotate(False)
-        if self.helper.A and self.car.velocity < 0:
-            self.car.rotate(True)
-        if self.helper.D and self.car.velocity > 0:
-            self.car.rotate(True)
-        if self.helper.D and self.car.velocity < 0:
-            self.car.rotate(False)
+            if not self.helper.W and self.car.velocity > 0:
+                self.car.accelerate(False, False, True)
+            elif not self.helper.S and self.car.velocity < 0:
+                self.car.accelerate(False, False, False)
 
-        # Handle car position change
-        self.car.y += self.car.get_shift_y(self.car.velocity)
-        self.car.x += self.car.get_shift_x(self.car.velocity)
+            # Handle car rotation
+            if self.helper.A and self.car.velocity > 0:
+                self.car.rotate(False)
+            if self.helper.A and self.car.velocity < 0:
+                self.car.rotate(True)
+            if self.helper.D and self.car.velocity > 0:
+                self.car.rotate(True)
+            if self.helper.D and self.car.velocity < 0:
+                self.car.rotate(False)
 
-        ##### DEBUG #####
+            # Handle car position change
+            self.car.y += self.car.get_shift_y(self.car.velocity)
+            self.car.x += self.car.get_shift_x(self.car.velocity)
 
-        # Loop car on border, just for lols and not losing the car
-        #if self.car.x > self.get_size()[0]:
-        #    self.car.x = 0
-        #elif self.car.x < 0:
-        #    self.car.x = self.get_size()[0]
-        #if self.car.y > self.get_size()[1]:
-        #    self.car.y = 0
-        #elif self.car.y < 0:
-        #    self.car.y = self.get_size()[1]
+            ##### DEBUG #####
+
+            # Loop car on border, just for lols and not losing the car
+            #if self.car.x > self.get_size()[0]:
+            #    self.car.x = 0
+            #elif self.car.x < 0:
+            #    self.car.x = self.get_size()[0]
+            #if self.car.y > self.get_size()[1]:
+            #    self.car.y = 0
+            #elif self.car.y < 0:
+            #    self.car.y = self.get_size()[1]
+
+    def reset(self):
+        self.points = 0
+        self.cookie_counter = 0
+        self.terminal = False
+        self.car.reset()
+        return self.car.get_intersection_distances(0)
+
+    def do_action(self, choice):
+        self.release()
+        if choice == 0:
+            self.press_W()
+        elif choice == 1:
+            self.press_S()
+        elif choice == 2:
+            self.press_A()
+        elif choice == 3:
+            self.press_D()
 
     def exit(self):
         arcade.window_commands.close_window()
@@ -241,5 +259,8 @@ class CarGame(arcade.Window):
         self.helper.S = False
         self.helper.A = False
 
-    def get_state(self):
-        return self.car.get_intersection_distances(), self.points, self.terminal_counter
+    def get_state(self, action):
+        self.do_action(action)
+        if not self.terminal:
+            self.points += 1
+        return self.car.get_intersection_distances(self.cookie_counter % 49), self.points, self.terminal
