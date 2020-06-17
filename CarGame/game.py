@@ -16,9 +16,9 @@ class CarGame(arcade.Window):
         self.car = Car(109, 528, 0.5, 0.5, 90, self.track)
         self.helper = Helper()
         self.color = arcade.color.GREEN
-        self.points = 0
         self.terminal = False
         self.cookie_counter = 0
+        self.cookie_counter_old = 0
 
     # Render the screen
     def on_draw(self):
@@ -67,8 +67,8 @@ class CarGame(arcade.Window):
         #                 10, arcade.color.BLACK, 12)
         #arcade.draw_text('Terminal: '+str(self.terminal_counter), 10,
         #                 10, arcade.color.BLACK, 12)
-        arcade.draw_text('Points: '+str(self.points), 10,
-                         30, arcade.color.BLACK, 12)
+        #arcade.draw_text('Points: '+str(self.points), 10,
+        #                 30, arcade.color.BLACK, 12)
 
     # Handle mouse movement -> for track creation
     def on_mouse_press(self, x, y, button, modifiers):
@@ -173,7 +173,7 @@ class CarGame(arcade.Window):
                         cookie = True
 
             if cookie and not self.helper.cookie:
-                self.points += 100
+                #self.points += 100
                 self.cookie_counter += 1
                 self.helper.cookie = True
             elif not cookie:
@@ -221,8 +221,9 @@ class CarGame(arcade.Window):
             #    self.car.y = self.get_size()[1]
 
     def reset(self):
-        self.points = 0
+        #self.points = 0
         self.cookie_counter = 0
+        self.cookie_counter_old = 0
         self.terminal = False
         self.car.reset()
         return self.car.get_intersection_distances(0)
@@ -234,8 +235,10 @@ class CarGame(arcade.Window):
         elif choice == 1:
             self.press_S()
         elif choice == 2:
+            #self.press_W()
             self.press_A()
         elif choice == 3:
+            #self.press_W()
             self.press_D()
 
     def exit(self):
@@ -261,6 +264,9 @@ class CarGame(arcade.Window):
 
     def get_state(self, action):
         self.do_action(action)
-        if not self.terminal:
-            self.points += 1
-        return self.car.get_intersection_distances(self.cookie_counter % 49), self.points, self.terminal
+        reward = 1
+        if self.cookie_counter != self.cookie_counter_old:
+            reward = 100
+        if self.terminal:
+            reward = -100
+        return self.car.get_intersection_distances(self.cookie_counter % 49), reward, self.terminal
