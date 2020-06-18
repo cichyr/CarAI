@@ -265,8 +265,14 @@ class CarGame(arcade.Window):
     def get_state(self, action):
         self.do_action(action)
         reward = 1
+        if self.car.velocity == 0.0:
+            reward = -1
         if self.cookie_counter != self.cookie_counter_old:
+            self.cookie_counter_old = self.cookie_counter
             reward = 100
         if self.terminal:
-            reward = -100
+            reward = -1000
         return self.car.get_intersection_distances(self.cookie_counter % 49), reward, self.terminal
+
+    def get_params(self):
+        return len(self.car.get_intersection_distances(self.cookie_counter % 49)), 4

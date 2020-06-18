@@ -15,7 +15,7 @@ game = ''
 def run_game():
     SCREEN_WIDTH = 1920
     SCREEN_HEIGHT = 1080
-    SCREEN_TITLE = "Car Racer"
+    SCREEN_TITLE = 'Car Racer'
     global game
     game = CarGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     game.set_update_rate(1/60)
@@ -28,11 +28,13 @@ def average(scoreboard):
 
 
 def write_stats(log, score):
-    file = open('log.txt', 'wt')
+    file = open('log.txt', 'a')
+    file.write('\n')
     file.write(log)
     file.close()
 
-    file = open('log_score.txt', 'wt')
+    file = open('log_score.txt', 'a')
+    file.write('\n')
     file.write(score)
     file.close()
 
@@ -45,8 +47,7 @@ def main():
     
     #print(state)
 
-    observation_space = 15
-    action_space = 4
+    observation_space, action_space = game.get_params()
 
     dqn = DeepQNetwork(observation_space, action_space)
     run = 0
@@ -69,11 +70,11 @@ def main():
             state = state_next
             if terminal:
                 scoreboard.append(points)
-                print("Run: " + str(run) + ", exploration: " + str(dqn.exploration_rate) + ", score: " + str(points))
+                print('Run: ' + str(run) + ', exploration: ' + str(dqn.exploration_rate) + ', score: ' + str(points))
                 if run % 100 == 0 and run > 0:
                     avg = average(scoreboard)
                     scoreboard.clear()
-                    log = "Run: " + str(run) + ", exploration: " + str(dqn.exploration_rate) + ", score: " + str(points) + ", avg: " + str(avg)
+                    log = 'Run: ' + str(run) + ', exploration: ' + str(dqn.exploration_rate) + ', score: ' + str(points) + ', avg: ' + str(avg)
                     write_stats(log, str(avg))
 
                 break

@@ -142,12 +142,15 @@ class Car():
         distances.append(self.x)
         distances.append(self.y)
         distances.append(self.velocity)
+        distances.append(self.rotation)
         p1 = self.track.trackCookies[cookie * 2]
         p2 = self.track.trackCookies[(cookie * 2) + 1]
-        l = self.calculate_length(p1, p2)
+        p_middle_1 = (p2[0]-p1[0], p2[1]-p2[1])
+        p_middle_2 = (self.fL()[0]-self.fR()[0], self.fL()[1]-self.fR()[1])
+        l = self.calculate_length(p_middle_1, p_middle_2)
         distances.append(l)
-        angle = (math.asin((p2[1] - p1[1]) / l) * (180 / math.pi)) - self.rotation
-        distances.append(angle)
+        #angle = (math.asin((p2[1] - p1[1]) / l) * (180 / math.pi)) - self.rotation
+        #distances.append(angle)
         return distances
 
     # Get shift in Y axis
