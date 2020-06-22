@@ -163,7 +163,7 @@ class CarGame(arcade.Window):
         if not self.terminal:
             cookie = False
 
-            awaited_cookie = int((self.cookie_counter % 49) + 1)
+            awaited_cookie = int((self.cookie_counter % 49))
 
             # Cookie collsion
             if not self.helper.cookie:
@@ -264,14 +264,14 @@ class CarGame(arcade.Window):
 
     def get_state(self, action):
         self.do_action(action)
-        reward = 1
-        if self.car.velocity == 0.0:
+        reward = 0
+        if self.car.velocity == 0.0 and (self.helper.A or self.helper.D):
             reward = -1
         if self.cookie_counter != self.cookie_counter_old:
             self.cookie_counter_old = self.cookie_counter
             reward = 100
-        if self.terminal:
-            reward = -1000
+        # if self.terminal:
+        #     reward = -1000
         return self.car.get_intersection_distances(self.cookie_counter % 49), reward, self.terminal
 
     def get_params(self):
