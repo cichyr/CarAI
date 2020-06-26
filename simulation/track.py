@@ -1,9 +1,16 @@
 # Class representing track and collisions
 class Track():
+    """Class representing track.
+
+    Contains following:
+     * track_outer_boundary[]
+     * track_inner_boundary[]
+     * track_cookies[]
+    """
 
     # Initialize variables (track points)
     def __init__(self):
-        self.trackOuterBoundary = [
+        self.track_outer_boundary = [
             (58, 179),
             (58, 871),
             (196, 982),
@@ -27,7 +34,7 @@ class Track():
             (58, 179)
         ]
 
-        self.trackInnerBoundary = [
+        self.track_inner_boundary = [
             (160, 238),
             (160, 818),
             (269, 889),
@@ -51,7 +58,7 @@ class Track():
         ]
 
         # Cookies for AI - so it knows it does good job
-        self.trackCookies = [
+        self.track_cookies = [
             (30, 629),
             (201, 621),
             (38, 766),
@@ -150,9 +157,4 @@ class Track():
             (40, 373),
             (180, 447),
             (44, 455)
-        ]
-
-        self.track_finish = [
-            (1900, 404),
-            (1900, 510)
         ]

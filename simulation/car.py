@@ -1,5 +1,5 @@
 from shapely.geometry import LineString
-from CarGame.track import Track
+from .track import Track
 import math
 
 
@@ -25,13 +25,29 @@ class Car():
 
     # Reset car values
     def reset(self):
+        """Restores default values of car."""
         self.x = self.__x
         self.y = self.__y
         self.rotation = self.__rotation
         self.velocity = 0
 
-    # Get car seeing rays - 100 pixels each direction
+    # Get car seeing rays - 400 pixels each direction
     def get_rays(self):
+        """Creates ray list and returns it. List contains rays in following
+        directions:
+
+            * front:
+                * straight
+                * left 10,45,90 deg
+                * right 10,45,90 deg
+            * rear:
+                * straight
+                * left 45 deg
+                * right 45 deg
+
+        Returns:
+            List(Tuple(x,y)): Ray beginning and ending coordinates
+        """
         ray = 400
         rays = []
         fr = self.fR()
@@ -97,6 +113,11 @@ class Car():
 
     # Returns intersection points
     def get_ray_intersection_points(self):
+        """Return ray intersection points list.
+
+        Returns:
+            List(Tuple(x,y)): List containing points as Tuple(x,y)
+        """
         intersection_points = []
         rays = self.get_rays()
         for i in range(0, 10):
@@ -106,7 +127,7 @@ class Car():
             l1 = LineString([rays[i*2], rays[i*2 + 1]])
 
             # Get intersection with track outer boundary
-            for section in zip(self.track.trackOuterBoundary, self.track.trackOuterBoundary[1:]):
+            for section in zip(self.track.track_outer_boundary, self.track.track_outer_boundary[1:]):
                 l2 = LineString([section[0], section[1]])
                 if l1.intersects(l2):
                     point = (l1.intersection(l2).xy[0][0], l1.intersection(l2).xy[1][0])
@@ -115,7 +136,7 @@ class Car():
                         intersection_points[i] = (rays[i*2], point)
 
             # Get intersection with track inner boundary
-            for section in zip(self.track.trackInnerBoundary, self.track.trackInnerBoundary[1:]):
+            for section in zip(self.track.track_inner_boundary, self.track.track_inner_boundary[1:]):
                 l2 = LineString([section[0], section[1]])
                 if l1.intersects(l2):
                     point = (l1.intersection(l2).xy[0][0], l1.intersection(l2).xy[1][0])
@@ -126,7 +147,12 @@ class Car():
         return intersection_points
 
     # Get distances to intersections
-    def get_intersection_distances(self, cookie):
+    def get_intersection_distances(self):
+        """Function which calculates distances between intersection points.
+
+        Returns:
+            List(int): List of distances and velocity
+        """
         intersections = self.get_ray_intersection_points()
         distances = []
 
@@ -141,16 +167,8 @@ class Car():
 
         distances.append(self.x)
         distances.append(self.y)
+        distances.append(self.rotation)
         distances.append(self.velocity)
-        # distances.append(self.rotation)
-        # p1 = self.track.trackCookies[cookie * 2]
-        # p2 = self.track.trackCookies[(cookie * 2) + 1]
-        # p_middle_1 = (p2[0]-p1[0], p2[1]-p2[1])
-        # p_middle_2 = (self.fL()[0]-self.fR()[0], self.fL()[1]-self.fR()[1])
-        # l = self.calculate_length(p_middle_1, p_middle_2)
-        # distances.append(l)
-        #angle = (math.asin((p2[1] - p1[1]) / l) * (180 / math.pi)) - self.rotation
-        #distances.append(angle)
         return distances
 
     # Get shift in Y axis
