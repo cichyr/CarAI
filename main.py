@@ -118,6 +118,10 @@ if __name__ == '__main__':
         load_file = True if int(sys.argv[2]) != 0 else False
         main(sys.argv[1], load_file)
     elif len(sys.argv) == 2:
-        main(sys.argv[1])
+        try:
+            load_file = True if int(sys.argv[1]) != 0 else False
+            main(load_file=load_file)
+        except:
+            main(sys.argv[1])
     else:
         main()
